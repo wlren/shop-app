@@ -7,6 +7,9 @@ import '../models/http_exception.dart';
 
 class ProductsProvider with ChangeNotifier {
   List<Product> _items = [];
+  final String authToken;
+
+  ProductsProvider(this.authToken, this._items);
 
   List<Product> get items {
     return [..._items];
@@ -17,8 +20,8 @@ class ProductsProvider with ChangeNotifier {
   }
 
   Future<void> fetchAndSetProducts() async {
-    const url =
-        'https://flutterupdate-a25d6-default-rtdb.firebaseio.com/products.json';
+    final url =
+        'https://flutterupdate-a25d6-default-rtdb.firebaseio.com/products.json?auth=$authToken';
     try {
       final response = await http.get(url);
       final extractedData = json.decode(response.body) as Map<String, dynamic>;
@@ -44,8 +47,8 @@ class ProductsProvider with ChangeNotifier {
   }
 
   Future<void> addProduct(Product product) async {
-    const url =
-        'https://flutterupdate-a25d6-default-rtdb.firebaseio.com/products.json';
+    final url =
+        'https://flutterupdate-a25d6-default-rtdb.firebaseio.com/products.json?auth=$authToken';
     try {
       final response = await http.post(
         url,
@@ -76,7 +79,7 @@ class ProductsProvider with ChangeNotifier {
     final prodIndex = _items.indexWhere((element) => element.id == id);
     if (prodIndex >= 0) {
       final url =
-          'https://flutterupdate-a25d6-default-rtdb.firebaseio.com/products/$id.json';
+          'https://flutterupdate-a25d6-default-rtdb.firebaseio.com/products/$id.json?auth=$authToken';
       await http.patch(url,
           body: json.encode({
             'title': newProduct.title,
@@ -91,7 +94,7 @@ class ProductsProvider with ChangeNotifier {
 
   Future<void> deleteProdct(String id) async {
     final url =
-        'https://flutterupdate-a25d6-default-rtdb.firebaseio.com/products/$id.json';
+        'https://flutterupdate-a25d6-default-rtdb.firebaseio.com/products/$id.json?auth=$authToken';
     final existingIndex = _items.indexWhere((element) => element.id == id);
     var existingProduct = _items[existingIndex];
 
