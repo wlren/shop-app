@@ -8,8 +8,9 @@ import '../models/http_exception.dart';
 class ProductsProvider with ChangeNotifier {
   List<Product> _items = [];
   final String authToken;
+  final String userId;
 
-  ProductsProvider(this.authToken, this._items);
+  ProductsProvider(this.authToken, this._items, this.userId);
 
   List<Product> get items {
     return [..._items];
@@ -20,7 +21,7 @@ class ProductsProvider with ChangeNotifier {
   }
 
   Future<void> fetchAndSetProducts() async {
-    final url =
+    var url =
         'https://flutterupdate-a25d6-default-rtdb.firebaseio.com/products.json?auth=$authToken';
     try {
       final response = await http.get(url);
@@ -28,10 +29,17 @@ class ProductsProvider with ChangeNotifier {
       if (extractedData == null) {
         return;
       }
+      url =
+          'https://flutterupdate-a25d6-default-rtdb.firebaseio.com/userFavourites/$userId.json?auth=$authToken';
+      final favouriteResponse = await http.get(url);
+      final favouriteData = json.decode(favouriteResponse.body);
       final List<Product> loadedProduct = [];
       extractedData.forEach((prodID, prodData) {
         loadedProduct.add(
           Product(
+              isFavourite: favouriteData == null
+                  ? false
+                  : favouriteData[prodID] ?? false,
               description: prodData['description'],
               id: prodID,
               imageUrl: prodData['imageUrl'],
@@ -57,7 +65,6 @@ class ProductsProvider with ChangeNotifier {
           'description': product.description,
           'imageUrl': product.imageUrl,
           'price': product.price,
-          'isFavourite': product.isFavourite
         }),
       );
       final newProduct = Product(

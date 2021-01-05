@@ -19,17 +19,18 @@ class Product with ChangeNotifier {
     this.isFavourite = false,
   });
 
-  void toggleFav(String token) async {
+  Future<void> toggleFav(String token, String userId) async {
     final oldStatus = isFavourite;
     isFavourite = !isFavourite;
+    notifyListeners();
     final url =
-        'https://flutterupdate-a25d6-default-rtdb.firebaseio.com/products/$id.json?auth=$token';
+        'https://flutterupdate-a25d6-default-rtdb.firebaseio.com/userFavourites/$userId/$id.json?auth=$token';
     try {
-      final response = await http.patch(
+      final response = await http.put(
         url,
-        body: json.encode({
-          'isFavourite': isFavourite,
-        }),
+        body: json.encode(
+          isFavourite,
+        ),
       );
       if (response.statusCode >= 400) {
         isFavourite = oldStatus;
@@ -39,6 +40,5 @@ class Product with ChangeNotifier {
       isFavourite = oldStatus;
       notifyListeners();
     }
-    notifyListeners();
   }
 }
